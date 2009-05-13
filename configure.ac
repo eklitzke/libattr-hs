@@ -3,8 +3,6 @@
 
 AC_PREREQ([2.63])
 AC_INIT([FULL-PACKAGE-NAME], [VERSION], [BUG-REPORT-ADDRESS])
-AC_CONFIG_SRCDIR([Xattr_hsc_make.c])
-AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
 AC_PROG_AWK
