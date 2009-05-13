@@ -1,6 +1,6 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
 
-module Xattr
+module System.Xattr
     ( setxattr
     , lsetxattr
     , fsetxattr
