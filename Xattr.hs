@@ -9,9 +9,13 @@ module Xattr
     , getxattr
     , lgetxattr
     , fgetxattr
+    , listxattr
+    , llistxattr
+    , flistxattr
     )
     where
 
+import Data.Char
 import Foreign.C
 import Foreign.Ptr
 import Foreign.Marshal.Alloc
@@ -87,3 +91,31 @@ lgetxattr path = mkGetxattr "lgetxattr" path newCString c_lgetxattr
 
 fgetxattr :: Handle -> String -> IO BS.ByteString
 fgetxattr handle = mkGetxattr "fgetxattr" handle handleToIOCInt c_fgetxattr
+
+-- split a string on NUL characters
+splitNull :: String -> [String]
+splitNull [] = []
+splitNull s  = case suf of
+                 "" -> [pre]
+                 _  -> pre : (splitNull $ tail suf)
+    where
+      (pre, suf) = break (\c -> ord c == 0) s
+
+mkListxattr :: String -> a -> (a -> IO b) -> (b -> CString -> CSize -> IO CSsize) -> IO [String]
+mkListxattr funcName x iox cFunc = do
+  x' <- iox x
+  allocaBytes allocBufSize $ \mem -> do
+                       buflen <- cFunc x' mem allocCSize
+                       if buflen == -1
+                          then throwErrno funcName
+                          else do s <- peekCStringLen (mem, fromIntegral buflen)
+                                  return $ splitNull s
+
+listxattr :: String -> IO [String]
+listxattr path = mkListxattr "listxattr" path newCString c_listxattr
+
+llistxattr :: String -> IO [String]
+llistxattr path = mkListxattr "llistxattr" path newCString c_llistxattr
+
+flistxattr :: Handle -> IO [String]
+flistxattr handle = mkListxattr "flistxattr" handle handleToIOCInt c_flistxattr
