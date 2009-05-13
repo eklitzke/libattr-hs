@@ -1,5 +1,3 @@
-{-# INCLUDE <sys/types.h> #-}
-{-# INCLUDE <attr/xattr.h> #-}
 {-# LANGUAGE ForeignFunctionInterface #-}
 
 module Xattr
@@ -12,8 +10,12 @@ module Xattr
     , listxattr
     , llistxattr
     , flistxattr
+    , XattrMode(RegularMode,CreateMode,ReplaceMode)
     )
     where
+
+#include <sys/types.h>
+#include <attr/xattr.h>
 
 import Data.Char
 import Foreign.C
@@ -29,7 +31,13 @@ type Void = CChar
 
 data XattrMode = RegularMode | CreateMode | ReplaceMode
 
---foreign import "XATTR_CREATE" xattrCreateMode :: Int
+instance Enum XattrMode where
+    fromEnum RegularMode = 0
+    fromEnum CreateMode  = #{const XATTR_CREATE}
+    fromEnum ReplaceMode = #{const XATTR_REPLACE}
+    toEnum 0                      = RegularMode
+    toEnum #{const XATTR_CREATE}  = CreateMode
+    toEnum #{const XATTR_REPLACE} = ReplaceMode
 
 allocBufSize :: Int
 allocBufSize = 1024
@@ -50,12 +58,12 @@ foreign import ccall unsafe "llistxattr" c_llistxattr :: CString -> CString -> C
 foreign import ccall unsafe "flistxattr" c_flistxattr :: CInt -> CString -> CSize -> IO CSsize
 
 -- return a high level wrapper for a setxattr variant
-mkSetxattr :: String -> a -> (a -> IO b) -> (b -> CString -> Ptr Void -> CSize -> CInt -> IO CInt) -> String -> BS.ByteString -> Int -> IO ()
-mkSetxattr funcName x iox cFunc attrName attrData flags = do
+mkSetxattr :: String -> a -> (a -> IO b) -> (b -> CString -> Ptr Void -> CSize -> CInt -> IO CInt) -> String -> BS.ByteString -> XattrMode -> IO ()
+mkSetxattr funcName x iox cFunc attrName attrData mode = do
   x' <- iox x
   cName <- newCString attrName
   val <- BS.useAsCStringLen attrData $ \(binaryData, dataLen) ->
-                                    cFunc x' cName binaryData (fromIntegral dataLen) (fromIntegral flags)
+                                    cFunc x' cName binaryData (fromIntegral dataLen) (fromIntegral $ fromEnum mode)
   if val /= 0
      then throwErrno funcName
      else return ()
@@ -63,13 +71,13 @@ mkSetxattr funcName x iox cFunc attrName attrData flags = do
 handleToIOCInt :: Handle -> IO CInt
 handleToIOCInt = fmap fromIntegral . handleToFd
 
-setxattr :: String -> String -> BS.ByteString -> Int -> IO ()
+setxattr :: String -> String -> BS.ByteString -> XattrMode -> IO ()
 setxattr path = mkSetxattr "setxattr" path newCString c_setxattr
 
-lsetxattr :: String -> String -> BS.ByteString -> Int -> IO ()
+lsetxattr :: String -> String -> BS.ByteString -> XattrMode -> IO ()
 lsetxattr path = mkSetxattr "lsetxattr" path newCString c_lsetxattr
 
-fsetxattr :: Handle -> String -> BS.ByteString -> Int -> IO ()
+fsetxattr :: Handle -> String -> BS.ByteString -> XattrMode -> IO ()
 fsetxattr handle = mkSetxattr "fsetxattr" handle handleToIOCInt c_fsetxattr
 
 -- return a high level wrapper for a getxattr variant
