@@ -16,12 +16,17 @@
 module System.Xattr
     (
     -- * Functions
+    -- ** Set Functions
       setxattr
     , lsetxattr
     , fsetxattr
+
+    -- ** Get Functions
     , getxattr
     , lgetxattr
     , fgetxattr
+
+    -- ** List Functions
     , listxattr
     , llistxattr
     , flistxattr
@@ -44,7 +49,6 @@ import System.Xattr.Types
 import Data.ByteString (ByteString, useAsCStringLen, packCStringLen)
 
 type Void = CChar
-type AttrName = String
 
 allocBufSize :: Int
 allocBufSize = 4096
@@ -133,7 +137,7 @@ mkListxattr funcName x iox cFunc = do
 listxattr :: FilePath -> IO [AttrName]
 listxattr path = mkListxattr "listxattr" path newCString c_listxattr
 
--- |Like listxattr, but if the path is a symbolic link get the attributes on the link itsel (not the file pointed to by the link)
+-- |Like listxattr, but if the path is a symbolic link get the attributes on the link itself (not the file pointed to by the link)
 llistxattr :: FilePath -> IO [AttrName]
 llistxattr path = mkListxattr "llistxattr" path newCString c_llistxattr
 

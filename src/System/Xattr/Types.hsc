@@ -1,14 +1,20 @@
 module System.Xattr.Types
     (
     -- * Data Types
-      XattrMode(RegularMode,CreateMode,ReplaceMode)
+      AttrName
+    , XattrMode(RegularMode,CreateMode,ReplaceMode)
     )
     where
 
 #include <sys/types.h>
 #include <attr/xattr.h>
 
-data XattrMode = RegularMode | CreateMode | ReplaceMode
+-- |Represents the mode for an update (i.e. set) operation
+data XattrMode
+    = RegularMode -- ^ The attribute will be created if it does not yet exist, and replace the existing named attribute otherwise.
+    | CreateMode  -- ^ Specifies a pure create, which fails if the named attribute exists already.
+    | ReplaceMode -- ^ Specifies a pure replace operation, which fails if the named attribute does not already exist.
+    deriving (Eq, Show)
 
 instance Enum XattrMode where
     fromEnum RegularMode = 0
@@ -17,3 +23,8 @@ instance Enum XattrMode where
     toEnum 0                      = RegularMode
     toEnum #{const XATTR_CREATE}  = CreateMode
     toEnum #{const XATTR_REPLACE} = ReplaceMode
+
+-- |The name of an attribute. Some filesystems support arbitrarily long names,
+-- but for portability you're recommended to limit this to 255 bytes.
+type AttrName = String 
+

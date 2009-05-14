@@ -17,8 +17,6 @@ Build-Type: Configure
 Extra-Source-Files:
     README.md
     LICENSE
-    configure.guess
-    configure.sub
     configure.ac
     configure
  
