@@ -1,11 +1,11 @@
 --------------------------------------------------------------------------------
 -- |
--- Module : Sound.Xattr
+-- Module : System.Xattr
 -- Copyright : (c) Evan Klitzke 2009
 -- License : BSD3
 -- Maintainer: Evan Klitzke <evan@eklitzke.org>
 -- Stability : experimental
--- Portability : only tested with GHC
+-- Portability : GHC only
 --
 -- Relatively low-level interface to work with extended attributes on Unix
 -- systems. This is a fairly straightforward port of the API exposed by SGI's
@@ -27,6 +27,7 @@ module System.Xattr
     , flistxattr
 
     -- * Data Types
+    , AttrName
     , XattrMode(RegularMode,CreateMode,ReplaceMode)
     )
     where
@@ -43,6 +44,7 @@ import System.Xattr.Types
 import Data.ByteString (ByteString, useAsCStringLen, packCStringLen)
 
 type Void = CChar
+type AttrName = String
 
 allocBufSize :: Int
 allocBufSize = 4096
@@ -63,7 +65,7 @@ foreign import ccall unsafe "llistxattr" c_llistxattr :: CString -> CString -> C
 foreign import ccall unsafe "flistxattr" c_flistxattr :: CInt -> CString -> CSize -> IO CSsize
 
 -- return a high level wrapper for a setxattr variant
-mkSetxattr :: String -> a -> (a -> IO b) -> (b -> CString -> Ptr Void -> CSize -> CInt -> IO CInt) -> String -> ByteString -> XattrMode -> IO ()
+mkSetxattr :: String -> a -> (a -> IO b) -> (b -> CString -> Ptr Void -> CSize -> CInt -> IO CInt) -> AttrName -> ByteString -> XattrMode -> IO ()
 mkSetxattr funcName x iox cFunc attrName attrData mode = do
   x' <- iox x
   cName <- newCString attrName
@@ -77,19 +79,19 @@ handleToIOCInt :: Handle -> IO CInt
 handleToIOCInt = fmap fromIntegral . handleToFd
 
 -- |Set an attribute on a regular file, by path
-setxattr :: FilePath -> String -> ByteString -> XattrMode -> IO ()
+setxattr :: FilePath -> AttrName -> ByteString -> XattrMode -> IO ()
 setxattr path = mkSetxattr "setxattr" path newCString c_setxattr
 
 -- |Like setxattr, but if the path is a symbolic link set the attribute on the link itself (not the file pointed to by the link)
-lsetxattr :: FilePath -> String -> ByteString -> XattrMode -> IO ()
+lsetxattr :: FilePath -> AttrName -> ByteString -> XattrMode -> IO ()
 lsetxattr path = mkSetxattr "lsetxattr" path newCString c_lsetxattr
 
 -- |Like setxattr, but use the handle specified rather than a file path
-fsetxattr :: Handle -> String -> ByteString -> XattrMode -> IO ()
+fsetxattr :: Handle -> AttrName -> ByteString -> XattrMode -> IO ()
 fsetxattr handle = mkSetxattr "fsetxattr" handle handleToIOCInt c_fsetxattr
 
 -- return a high level wrapper for a getxattr variant
-mkGetxattr :: String -> a -> (a -> IO b) -> (b -> CString -> Ptr Void -> CSize -> IO CSize) -> String -> IO ByteString
+mkGetxattr :: String -> a -> (a -> IO b) -> (b -> CString -> Ptr Void -> CSize -> IO CSize) -> AttrName -> IO ByteString
 mkGetxattr funcName x iox cFunc attrName = do
   x' <- iox x
   cName <- newCString attrName
@@ -100,15 +102,15 @@ mkGetxattr funcName x iox cFunc attrName = do
        else packCStringLen (mem, fromIntegral buflen)
 
 -- |Get an attribute on a regular file, by path
-getxattr :: FilePath -> String -> IO ByteString
+getxattr :: FilePath -> AttrName -> IO ByteString
 getxattr path = mkGetxattr "getxattr" path newCString c_getxattr
 
 -- |Like getxattr, but if the path is a symbolic link get the attribute on the link itself (not the file pointed to by the link)
-lgetxattr :: FilePath -> String -> IO ByteString
+lgetxattr :: FilePath -> AttrName -> IO ByteString
 lgetxattr path = mkGetxattr "lgetxattr" path newCString c_lgetxattr
 
 -- |Like getxattr, but use the handle specified rather than a file path
-fgetxattr :: Handle -> String -> IO ByteString
+fgetxattr :: Handle -> AttrName -> IO ByteString
 fgetxattr handle = mkGetxattr "fgetxattr" handle handleToIOCInt c_fgetxattr
 
 -- split a string on NUL characters
@@ -119,7 +121,7 @@ splitNull s  = case suf of
                  _  -> pre : (splitNull $ tail suf)
     where (pre, suf) = break (\c -> ord c == 0) s
 
-mkListxattr :: String -> a -> (a -> IO b) -> (b -> CString -> CSize -> IO CSsize) -> IO [String]
+mkListxattr :: String -> a -> (a -> IO b) -> (b -> CString -> CSize -> IO CSsize) -> IO [AttrName]
 mkListxattr funcName x iox cFunc = do
   x' <- iox x
   allocaBytes allocBufSize $ \mem -> do buflen <- cFunc x' mem allocCSize
@@ -128,13 +130,13 @@ mkListxattr funcName x iox cFunc = do
                                            else fmap splitNull $ peekCStringLen (mem, fromIntegral buflen)
 
 -- |Get a list of all of the attributes set on a path
-listxattr :: FilePath -> IO [String]
+listxattr :: FilePath -> IO [AttrName]
 listxattr path = mkListxattr "listxattr" path newCString c_listxattr
 
 -- |Like listxattr, but if the path is a symbolic link get the attributes on the link itsel (not the file pointed to by the link)
-llistxattr :: FilePath -> IO [String]
+llistxattr :: FilePath -> IO [AttrName]
 llistxattr path = mkListxattr "llistxattr" path newCString c_llistxattr
 
 -- |Like listxattr, but use the handle specified rather than a file path
-flistxattr :: Handle -> IO [String]
+flistxattr :: Handle -> IO [AttrName]
 flistxattr handle = mkListxattr "flistxattr" handle handleToIOCInt c_flistxattr
