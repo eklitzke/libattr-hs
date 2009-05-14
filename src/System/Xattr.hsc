@@ -80,7 +80,7 @@ mkSetxattr funcName x iox cFunc attrName attrData mode = do
   x' <- iox x
   cName <- newCString attrName
   val <- BS.useAsCStringLen attrData $ \(binaryData, dataLen) ->
-				    cFunc x' cName binaryData (fromIntegral dataLen) (fromIntegral $ fromEnum mode)
+                                                         cFunc x' cName binaryData (fromIntegral dataLen) (fromIntegral $ fromEnum mode)
   if val /= 0
      then throwErrno funcName
      else return ()
@@ -106,10 +106,10 @@ mkGetxattr funcName x iox cFunc attrName = do
   x' <- iox x
   cName <- newCString attrName
   allocaBytes allocBufSize $ \mem -> do
-		       buflen <- cFunc x' cName mem allocCSize
-		       if buflen == -1
-			  then throwErrno funcName
-			  else BS.packCStringLen (mem, fromIntegral buflen)
+    buflen <- cFunc x' cName mem allocCSize
+    if buflen == -1
+       then throwErrno funcName
+       else BS.packCStringLen (mem, fromIntegral buflen)
 
 -- |Get an attribute on a regular file, by path
 getxattr :: String -> String -> IO BS.ByteString
@@ -127,20 +127,18 @@ fgetxattr handle = mkGetxattr "fgetxattr" handle handleToIOCInt c_fgetxattr
 splitNull :: String -> [String]
 splitNull [] = []
 splitNull s  = case suf of
-		 "" -> [pre]
-		 _  -> pre : (splitNull $ tail suf)
-    where
-      (pre, suf) = break (\c -> ord c == 0) s
+                 "" -> [pre]
+                 _  -> pre : (splitNull $ tail suf)
+    where (pre, suf) = break (\c -> ord c == 0) s
 
 mkListxattr :: String -> a -> (a -> IO b) -> (b -> CString -> CSize -> IO CSsize) -> IO [String]
 mkListxattr funcName x iox cFunc = do
   x' <- iox x
-  allocaBytes allocBufSize $ \mem -> do
-		       buflen <- cFunc x' mem allocCSize
-		       if buflen == -1
-			  then throwErrno funcName
-			  else do s <- peekCStringLen (mem, fromIntegral buflen)
-				  return $ splitNull s
+  allocaBytes allocBufSize $ \mem -> do buflen <- cFunc x' mem allocCSize
+                                        if buflen == -1
+                                           then throwErrno funcName
+                                           else do s <- peekCStringLen (mem, fromIntegral buflen)
+  return $ splitNull s
 
 -- |Get a list of all of the attributes set on a path
 listxattr :: String -> IO [String]

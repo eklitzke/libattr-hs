@@ -9,7 +9,9 @@ Category:      System
 Copyright:     (c) 2009 by Evan Klitzke
 Synopsis:      Haskell binding to libattr
 Description:
-  Stuff
+  Relatively low-level interface to work with extended attributes on Unix
+  systems. This is a fairly straightforward port of the API exposed by SGI's
+  libattr.
  
 Build-Type: Configure
 Extra-Source-Files:
