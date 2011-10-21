@@ -3,10 +3,8 @@ module System.Xattr.CFuncs where
 
 import Foreign.C
 import Foreign.Ptr
-import Foreign.Marshal.Alloc
 import Data.Bits ((.|.))
 import System.Posix.Types
-import System.Xattr.Types
 
 type Void = CChar
 
@@ -53,6 +51,8 @@ c_flistxattr :: CInt -> CString -> CSize -> IO CSsize
 c_flistxattr fd list size = c_osx_flistxattr fd list size 0
 
 #else
+
+-- We assume Linux.
 
 foreign import ccall unsafe "setxattr" c_setxattr :: CString -> CString -> Ptr Void -> CSize -> CInt -> IO CInt
 foreign import ccall unsafe "lsetxattr" c_lsetxattr :: CString -> CString -> Ptr Void -> CSize -> CInt -> IO CInt
