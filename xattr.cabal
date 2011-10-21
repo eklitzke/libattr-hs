@@ -21,7 +21,7 @@ Extra-Source-Files:
     configure
  
 Library
-  Exposed-Modules: System.Xattr System.Xattr.Types
+  Exposed-Modules: System.Xattr System.Xattr.Types System.Xattr.CFuncs
   Build-Depends: base, bytestring, unix 
   Extensions: ForeignFunctionInterface, CPP
   Hs-Source-Dirs: src

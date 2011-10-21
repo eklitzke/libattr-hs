@@ -7,7 +7,12 @@ module System.Xattr.Types
     where
 
 #include <sys/types.h>
+
+#if defined(__APPLE__)
+#include <sys/xattr.h>
+#else
 #include <attr/xattr.h>
+#endif
 
 -- |Represents the mode for an update (i.e. set) operation
 data XattrMode

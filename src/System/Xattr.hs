@@ -48,7 +48,8 @@ import System.Xattr.Types
 
 import Data.ByteString (ByteString, useAsCStringLen, packCStringLen)
 
-type Void = CChar
+import System.Xattr.CFuncs
+
 
 allocBufSize :: Int
 allocBufSize = 4096
@@ -56,17 +57,6 @@ allocBufSize = 4096
 allocCSize :: CSize
 allocCSize = fromIntegral allocBufSize
 
-foreign import ccall unsafe "setxattr" c_setxattr :: CString -> CString -> Ptr Void -> CSize -> CInt -> IO CInt
-foreign import ccall unsafe "lsetxattr" c_lsetxattr :: CString -> CString -> Ptr Void -> CSize -> CInt -> IO CInt
-foreign import ccall unsafe "fsetxattr" c_fsetxattr :: CInt -> CString -> Ptr Void -> CSize -> CInt -> IO CInt
-
-foreign import ccall unsafe "getxattr" c_getxattr :: CString -> CString -> Ptr Void -> CSize -> IO CSize
-foreign import ccall unsafe "lgetxattr" c_lgetxattr :: CString -> CString -> Ptr Void -> CSize -> IO CSize
-foreign import ccall unsafe "fgetxattr" c_fgetxattr :: CInt -> CString -> Ptr Void -> CSize -> IO CSize
-
-foreign import ccall unsafe "listxattr" c_listxattr :: CString -> CString -> CSize -> IO CSsize
-foreign import ccall unsafe "llistxattr" c_llistxattr :: CString -> CString -> CSize -> IO CSsize
-foreign import ccall unsafe "flistxattr" c_flistxattr :: CInt -> CString -> CSize -> IO CSsize
 
 -- return a high level wrapper for a setxattr variant
 mkSetxattr :: String -> a -> (a -> IO b) -> (b -> CString -> Ptr Void -> CSize -> CInt -> IO CInt) -> AttrName -> ByteString -> XattrMode -> IO ()
