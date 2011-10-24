@@ -8,7 +8,7 @@ module System.Xattr.Types
 
 #include <sys/types.h>
 
-#ifdef __APPLE__
+#if defined (__APPLE__) || defined (linux)
 #include <sys/xattr.h>
 #else
 #include <attr/xattr.h>
