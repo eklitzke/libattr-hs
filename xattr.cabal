@@ -1,7 +1,7 @@
 Author:        Evan Klitzke
 Maintainer:    Evan Klitzke <evan@eklitzke.org>
 Name:          xattr
-Version:       0.5.2
+Version:       0.5.3
 Cabal-Version: >= 1.2
 License:       BSD3
 License-File:  LICENSE
