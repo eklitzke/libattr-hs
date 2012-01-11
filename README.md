@@ -6,8 +6,9 @@ extended attributes, see the man page for attr(5).
 
 To build this code, you'll need to have the libattr development headers
 installed. On Fedora/RHEL the package name is `libattr-devel`. On Debian/Ubuntu
-the package name is `attr-dev`.
+the package name is `attr-dev`. On Arch the package is `attr`.
 
 You can find the latest stable version of this code on
 [HackageDB](http://hackage.haskell.org/packages/hackage.html). The bleeding-edge
-version of the code is hosted at git://github.com/eklitzke/libattr-hs.git.
+version of the code is hosted at git://github.com/eklitzke/libattr-hs.git
+and git://github.com/deian/libattr-hs.git.
