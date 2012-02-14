@@ -10,5 +10,4 @@ the package name is `attr-dev`. On Arch the package is `attr`.
 
 You can find the latest stable version of this code on
 [HackageDB](http://hackage.haskell.org/packages/hackage.html). The bleeding-edge
-version of the code is hosted at git://github.com/eklitzke/libattr-hs.git
-and git://github.com/deian/libattr-hs.git.
+version of the code is hosted on [git://github.com/deian/libattr-hs.git](git://github.com/deian/libattr-hs.git).
