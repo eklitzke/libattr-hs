@@ -1,13 +1,12 @@
 Author:        Evan Klitzke, Deian Stefan
-Maintainer:    Evan Klitzke <evan@eklitzke.org>
-               Deian Stefan <deian@cs.stanford.edu>
+Maintainer:    Deian Stefan <deian@cs.stanford.edu>
 Name:          xattr
 Version:       0.6.0
 Cabal-Version: >= 1.8
 License:       BSD3
 License-File:  LICENSE
 Category:      System
-Copyright:     (c) 2009 by Evan Klitzke, (c) Deian Stefan 2012
+Copyright:     (c) 2009 by Evan Klitzke, (c) 2012 by Deian Stefan
 Synopsis:      Haskell extended file attributes interface
 Description:
   Relatively low-level interface to work with extended attributes
@@ -20,7 +19,7 @@ Extra-Source-Files:
   LICENSE
   configure.ac
   configure
-  include/HsUnixConfig.h.in
+  include/HsXattrConfig.h.in
 Extra-Tmp-Files:
   config.log config.status autom4te.cache
   include/HsXattrConfig.h
@@ -37,7 +36,7 @@ Library
   Include-Dirs: include
   Includes: HsXattrConfig.h
   Install-Includes: HsXattrConfig.h
-  GHC-Options: -Wall -Werror -fno-warn-orphans
+  GHC-Options: -Wall -fno-warn-orphans
 
 Source-Repository head
     Type:     git

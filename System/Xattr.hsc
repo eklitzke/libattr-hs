@@ -50,6 +50,7 @@ module System.Xattr
     )
     where
 
+#include <sys/types.h>
 #include <attr/xattr.h>
 
 import Data.Functor ((<$>))
