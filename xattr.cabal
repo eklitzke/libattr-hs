@@ -28,7 +28,7 @@ Library
   Exposed-Modules:
     System.Xattr
   Build-Depends:
-    base,
+    base >= 4.0 && < 5,
     bytestring,
     unix
   Extensions: CPP, ForeignFunctionInterface
