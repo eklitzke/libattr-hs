@@ -27,12 +27,15 @@ Extra-Tmp-Files:
 Library
   Exposed-Modules:
     System.Xattr
+  Other-Modules:
+    System.Xattr.CFuncs
   Build-Depends:
     base >= 4.0 && < 5,
     bytestring,
     unix
   Extensions: CPP, ForeignFunctionInterface
-  Extra-Libraries: attr
+  if !os(darwin)
+    Extra-Libraries: attr
   Include-Dirs: include
   Includes: HsXattrConfig.h
   Install-Includes: HsXattrConfig.h
