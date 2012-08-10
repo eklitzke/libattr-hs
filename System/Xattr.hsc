@@ -137,9 +137,6 @@ lsetxattr :: FilePath -> AttrName -> AttrValue -> XattrMode -> IO ()
 #if HAVE_LSETXATTR
 lsetxattr path name val mode = withCString path $ \cName ->
   mkSetxattr "lsetxattr" cName c_lsetxattr name val mode
-
-foreign import ccall unsafe "lsetxattr"
-  c_lsetxattr :: CString -> CString -> Ptr Void -> CSize -> CInt -> IO CInt
 #else
 lsetxattr = error "System.Xattr.lsetxattr: not supported"
 #endif
