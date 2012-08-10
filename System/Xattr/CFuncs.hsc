@@ -3,7 +3,9 @@ module System.Xattr.CFuncs where
 
 import Foreign.C
 import Foreign.Ptr
+#ifdef __APPLE__
 import Data.Bits ((.|.))
+#endif
 import System.Posix.Types
 
 type Void = CChar

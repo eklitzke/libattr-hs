@@ -1,12 +1,12 @@
 Author:        Evan Klitzke, Deian Stefan
 Maintainer:    Deian Stefan <deian@cs.stanford.edu>
 Name:          xattr
-Version:       0.6.0
+Version:       0.6.1
 Cabal-Version: >= 1.8
 License:       BSD3
 License-File:  LICENSE
 Category:      System
-Copyright:     (c) 2009 by Evan Klitzke, (c) 2012 by Deian Stefan
+Copyright:     (c) 2009 by Evan Klitzke, (c) 2012 by Deian Stefan, (c) 2012 by Amit Levy
 Synopsis:      Haskell extended file attributes interface
 Description:
   Relatively low-level interface to work with extended attributes
