@@ -19,12 +19,6 @@
 --------------------------------------------------------------------------------
 #include "HsXattrConfig.h"
 
-#if !(HAVE_LIBATTR && HAVE_ATTR_XATTR_H && HAVE_SYS_TYPES_H)
-
-module System.Xattr () where
-
-#else
-
 module System.Xattr
     (
     -- * Functions
@@ -51,7 +45,11 @@ module System.Xattr
     where
 
 #include <sys/types.h>
+#ifdef __APPLE__
+#include <sys/xattr.h>
+#else
 #include <attr/xattr.h>
+#endif
 
 import Data.Functor ((<$>))
 import Foreign.C
@@ -66,6 +64,7 @@ import Data.ByteString (ByteString
                        , packCStringLen
                        , split)
 import Data.ByteString.Char8 (unpack)
+import System.Xattr.CFuncs
 
 -- | Mode for setting attributes.
 data XattrMode =
@@ -98,9 +97,6 @@ type AttrName = String
 -- the value be at most 64KB.
 type AttrValue = ByteString
 
--- | Type for void.
-type Void = CChar
-
 --
 -- Set extended attributes
 --
@@ -129,9 +125,6 @@ setxattr :: FilePath    -- ^ Object path
 #if HAVE_SETXATTR
 setxattr path name val mode = withCString path $ \cName ->
   mkSetxattr "setxattr" cName c_setxattr name val mode
-
-foreign import ccall unsafe "setxattr"
-  c_setxattr  :: CString -> CString -> Ptr Void -> CSize -> CInt -> IO CInt
 #else
 setxattr = error "System.Xattr.setxattr: not supported"
 #endif
@@ -156,9 +149,6 @@ fsetxattr :: Handle -> AttrName -> AttrValue -> XattrMode -> IO ()
 #if HAVE_FSETXATTR
 fsetxattr handle name val mode = handleToFd handle >>= \fd ->
   mkSetxattr "fsetxattr" (fromIntegral fd) c_fsetxattr name val mode
-
-foreign import ccall unsafe "fsetxattr"
-  c_fsetxattr :: CInt    -> CString -> Ptr Void -> CSize -> CInt -> IO CInt
 #else
 fsetxattr = error "System.Xattr.fsetxattr: not supported"
 #endif
@@ -170,7 +160,7 @@ fsetxattr = error "System.Xattr.fsetxattr: not supported"
 -- | High level wrapper for a @getxattr@ variant
 mkGetxattr :: String            -- ^ Function name
            -> cStringOrCInt     -- ^ Filepath ('CString') or handle ('CInt')
-           -> (cStringOrCInt -> CString -> Ptr Void -> CSize -> IO CSsize)
+           -> (cStringOrCInt -> CString -> Ptr Void -> CSize -> IO CSize)
            -> AttrName          -- ^ Attribute name
            -> IO AttrValue
 mkGetxattr funcName pathOrHandle cFunc attrName = do
@@ -187,9 +177,6 @@ getxattr :: FilePath -> AttrName -> IO AttrValue
 #if HAVE_GETXATTR
 getxattr path name = withCString path $ \cName ->
   mkGetxattr "getxattr" cName c_getxattr name
-
-foreign import ccall unsafe "getxattr"
-  c_getxattr  :: CString -> CString -> Ptr Void -> CSize -> IO CSsize
 #else
 getxattr = error "System.Xattr.getxattr: not supported"
 #endif
@@ -201,9 +188,6 @@ lgetxattr :: FilePath -> AttrName -> IO AttrValue
 #if HAVE_LGETXATTR
 lgetxattr path name = withCString path $ \cName ->
   mkGetxattr "lgetxattr" cName c_lgetxattr name
-
-foreign import ccall unsafe "lgetxattr"                           
-  c_lgetxattr :: CString -> CString -> Ptr Void -> CSize -> IO CSsize
 #else
 lgetxattr = error "System.Xattr.lgetxattr: not supported"
 #endif
@@ -213,9 +197,6 @@ fgetxattr :: Handle -> AttrName -> IO AttrValue
 #if HAVE_FGETXATTR
 fgetxattr handle name = handleToFd handle >>= \fd ->
   mkGetxattr "fgetxattr" (fromIntegral fd) c_fgetxattr name
-
-foreign import ccall unsafe "fgetxattr"                           
-  c_fgetxattr :: CInt    -> CString -> Ptr Void -> CSize -> IO CSsize
 #else
 fgetxattr = error "System.Xattr.fgetxattr: not supported"
 #endif
@@ -243,9 +224,6 @@ listxattr :: FilePath -> IO [AttrName]
 #if HAVE_LISTXATTR
 listxattr path = withCString path $ \cName ->
   mkListxattr "listxattr" cName c_listxattr
-
-foreign import ccall unsafe "listxattr"
-  c_listxattr  :: CString -> CString -> CSize -> IO CSsize
 #else
 listxattr = error "System.Xattr.listxattr: not supported"
 #endif
@@ -256,9 +234,6 @@ llistxattr :: FilePath -> IO [AttrName]
 #if HAVE_LLISTXATTR
 llistxattr path = withCString path $ \cName ->
   mkListxattr "llistxattr" cName c_llistxattr
-
-foreign import ccall unsafe "llistxattr"
-  c_llistxattr :: CString -> CString -> CSize -> IO CSsize
 #else
 llistxattr = error "System.Xattr.llistxattr: not supported"
 #endif
@@ -268,11 +243,7 @@ flistxattr :: Handle -> IO [AttrName]
 #if HAVE_FLISTXATTR
 flistxattr handle = handleToFd handle >>= \fd ->
   mkListxattr "flistxattr" (fromIntegral fd) c_flistxattr
-
-foreign import ccall unsafe "flistxattr"
-  c_flistxattr :: CInt    -> CString -> CSize -> IO CSsize
 #else
 flistxattr = error "System.Xattr.flistxattr: not supported"
 #endif
 
-#endif
