@@ -11,7 +11,7 @@ AC_PROG_CC
 # Checks for libraries.
 
 # Checks for header files.
-AC_CHECK_HEADERS([sys/types.h attr/xattr.h])
+AC_CHECK_HEADERS([sys/types.h attr/xattr.h sys/xattr.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 

@@ -7,7 +7,12 @@ module System.Xattr.Types
     where
 
 #include <sys/types.h>
+
+#if defined (__APPLE__) || defined (linux)
+#include <sys/xattr.h>
+#else
 #include <attr/xattr.h>
+#endif
 
 -- |Represents the mode for an update (i.e. set) operation
 data XattrMode
@@ -23,6 +28,7 @@ instance Enum XattrMode where
     toEnum 0                      = RegularMode
     toEnum #{const XATTR_CREATE}  = CreateMode
     toEnum #{const XATTR_REPLACE} = ReplaceMode
+    toEnum _                      = error "Unknown XattrMode"
 
 -- |The name of an attribute. Some filesystems support arbitrarily long names,
 -- but for portability you're recommended to limit this to 255 bytes.
