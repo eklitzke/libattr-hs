@@ -134,7 +134,7 @@ setxattr = error "System.Xattr.setxattr: not supported"
 -- attribute is set on the symbolic link itself, not the object
 -- refered to by the link.
 lsetxattr :: FilePath -> AttrName -> AttrValue -> XattrMode -> IO ()
-#if HAVE_LSETXATTR
+#if HAVE_LSETXATTR || (HAVE_SETXATTR && __APPLE__)
 lsetxattr path name val mode = withCString path $ \cName ->
   mkSetxattr "lsetxattr" cName c_lsetxattr name val mode
 #else
@@ -182,7 +182,7 @@ getxattr = error "System.Xattr.getxattr: not supported"
 -- attribute is retrieved from the link itself and not the referenced
 -- object.
 lgetxattr :: FilePath -> AttrName -> IO AttrValue
-#if HAVE_LGETXATTR
+#if HAVE_LGETXATTR || (HAVE_GETXATTR && __APPLE__)
 lgetxattr path name = withCString path $ \cName ->
   mkGetxattr "lgetxattr" cName c_lgetxattr name
 #else
@@ -228,7 +228,7 @@ listxattr = error "System.Xattr.listxattr: not supported"
 -- | Same as 'listxattr', but if the object is a symbolic link, the
 -- attributes of the link itself are returned, not on the referenced object.
 llistxattr :: FilePath -> IO [AttrName]
-#if HAVE_LLISTXATTR
+#if HAVE_LLISTXATTR || (HAVE_LISTXATTR && __APPLE__)
 llistxattr path = withCString path $ \cName ->
   mkListxattr "llistxattr" cName c_llistxattr
 #else
